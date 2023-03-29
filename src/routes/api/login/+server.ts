@@ -1,11 +1,8 @@
 import type { RequestHandler } from '@sveltejs/kit';
 import { getConnection } from '$lib/db';
-import { serialize } from 'cookie';
 // @ts-ignore
 import bcrypt from 'bcrypt';
-// @ts-ignore
-import { sign } from 'jsonwebtoken';
-import { JWT_SECRET } from '$env/static/private';
+import { authenticate } from '$lib/auth';
 
 export const POST: RequestHandler = async ({request}) => {
 	const { email, password } = await request.json();
@@ -35,19 +32,5 @@ export const POST: RequestHandler = async ({request}) => {
 		});
 	}
 
-	const jwt = sign({id: user.id}, JWT_SECRET, {expiresIn: 60 * 60 * 24 * 365});
-	const serialized = serialize('token', jwt, {
-		httpOnly: true,
-		sameSite: 'strict',
-		maxAge: 60 * 60 * 24 * 365,
-		path: '/',
-	});
-
-	return new Response(null, {
-		status: 302,
-		headers: {
-			'location': '/',
-			'set-cookie': serialized,
-		},
-	});
+	return authenticate(user.id)
 };
