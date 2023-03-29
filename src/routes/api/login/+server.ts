@@ -10,7 +10,6 @@ export const POST: RequestHandler = async ({request}) => {
 	const [rows]: any[] = await conn.execute('SELECT id, email, password_hash, cuil FROM users WHERE email = ?', [email]);
 
 	// if the user is not found in the database we redirect to signup
-	console.log(rows);
 	if (rows.length == 0) {
 		return new Response(null, {
 			status: 302,
